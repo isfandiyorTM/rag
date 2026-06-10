@@ -12,7 +12,6 @@ from typing import List, Dict
 
 import streamlit as st
 
-# ── Page config ────────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="FAQ Assistant",
     page_icon="💬",
@@ -24,238 +23,234 @@ from utils.document_processor import process_document
 from utils.vector_store import VectorStore
 from utils.rag_pipeline import get_embeddings, query as rag_query
 
-
-# ── Design tokens ──────────────────────────────────────────────────────────────
-CSS = """
+# ── CSS ────────────────────────────────────────────────────────────────────────
+st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
-
-/* ── Reset / Base ─────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
 html, body, [class*="css"] {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Hide Streamlit chrome */
 #MainMenu, footer, [data-testid="stToolbar"] { display: none !important; }
-header[data-testid="stHeader"] { display: none !important; }
+header[data-testid="stHeader"]               { display: none !important; }
 
-/* ── Backgrounds ──────────────────────────────────────────── */
+/* ── Layout backgrounds ── */
 .stApp,
 [data-testid="stAppViewContainer"],
 [data-testid="stMain"] {
-  background: #0f172a !important;
+  background: #f4f4f5 !important;
 }
-
 [data-testid="stSidebar"] {
-  background: #0c1322 !important;
-  border-right: 1px solid rgba(148,163,184,0.07) !important;
+  background: #ffffff !important;
+  border-right: 1px solid #e4e4e7 !important;
+  box-shadow: none !important;
 }
-[data-testid="stSidebar"] > div:first-child {
-  padding: 24px 18px 24px !important;
-}
-
-/* bottom bar (chat input area) */
+[data-testid="stSidebar"] > div:first-child { padding: 24px 18px !important; }
 [data-testid="stBottom"],
 [data-testid="stBottom"] > div {
-  background: #0f172a !important;
-  border-top: 1px solid rgba(148,163,184,0.07) !important;
-  padding-top: 10px !important;
+  background: #f4f4f5 !important;
+  border-top: 1px solid #e4e4e7 !important;
+  padding-top: 8px !important;
 }
 
-/* ── Scrollbar ────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(124,92,252,0.2); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(124,92,252,0.4); }
+/* ── Scrollbar ── */
+::-webkit-scrollbar              { width: 4px; }
+::-webkit-scrollbar-track        { background: transparent; }
+::-webkit-scrollbar-thumb        { background: #d4d4d8; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover  { background: #a1a1aa; }
 
-/* ── Divider ──────────────────────────────────────────────── */
+/* ── Divider ── */
 hr {
   border: none !important;
-  border-top: 1px solid rgba(148,163,184,0.08) !important;
-  margin: 20px 0 !important;
+  border-top: 1px solid #f4f4f5 !important;
+  margin: 16px 0 !important;
 }
 
-/* ── Buttons ──────────────────────────────────────────────── */
+/* ── Text ── */
+p, li, span { color: #3f3f46; }
+h1, h2, h3  { color: #18181b; letter-spacing: -0.02em; }
+.stCaption  { color: #a1a1aa !important; font-size: 0.72rem !important; }
+
+/* ── Buttons ── */
 .stButton > button {
-  border-radius: 8px !important;
   font-family: 'Inter', sans-serif !important;
-  font-size: 0.78rem !important;
+  font-size: 0.8rem !important;
   font-weight: 500 !important;
   height: 34px !important;
-  transition: all 0.15s ease !important;
-  border: 1px solid rgba(148,163,184,0.12) !important;
-  background: rgba(255,255,255,0.03) !important;
-  color: #94a3b8 !important;
-  letter-spacing: 0.01em !important;
+  border-radius: 7px !important;
+  border: 1px solid #e4e4e7 !important;
+  background: #ffffff !important;
+  color: #52525b !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
+  transition: background 0.1s, box-shadow 0.1s !important;
+  letter-spacing: 0 !important;
 }
 .stButton > button:hover {
-  background: rgba(255,255,255,0.07) !important;
-  color: #e2e8f0 !important;
-  border-color: rgba(148,163,184,0.2) !important;
-  transform: none !important;
+  background: #fafafa !important;
+  border-color: #d4d4d8 !important;
+  color: #18181b !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07) !important;
 }
 .stButton > button[kind="primary"] {
-  background: linear-gradient(135deg, #7c5cfc 0%, #22d3ee 100%) !important;
+  background: #4f46e5 !important;
   border: none !important;
-  color: #fff !important;
-  font-weight: 600 !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(79,70,229,0.25) !important;
 }
 .stButton > button[kind="primary"]:hover {
-  opacity: 0.88 !important;
-  box-shadow: 0 4px 20px rgba(124,92,252,0.35) !important;
+  background: #4338ca !important;
+  box-shadow: 0 2px 8px rgba(79,70,229,0.3) !important;
 }
 
-/* ── Text inputs ──────────────────────────────────────────── */
-.stTextInput > div > div > input,
-.stTextArea textarea {
-  background: rgba(255,255,255,0.03) !important;
-  border: 1px solid rgba(148,163,184,0.1) !important;
+/* ── Text / chat inputs ── */
+.stTextInput > div > div > input {
+  background: #fafafa !important;
+  border: 1px solid #e4e4e7 !important;
   border-radius: 8px !important;
-  color: #f1f5f9 !important;
+  color: #18181b !important;
   font-family: 'Inter', sans-serif !important;
+  box-shadow: none !important;
+  font-size: 0.875rem !important;
 }
-.stTextInput > div > div > input::placeholder { color: #475569 !important; }
-.stTextInput > div > div > input:focus,
-.stTextArea textarea:focus {
-  border-color: rgba(124,92,252,0.45) !important;
-  box-shadow: 0 0 0 3px rgba(124,92,252,0.1) !important;
+.stTextInput > div > div > input::placeholder { color: #a1a1aa !important; }
+.stTextInput > div > div > input:focus {
+  border-color: #4f46e5 !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(79,70,229,0.1) !important;
 }
-.stTextInput label, .stTextArea label { color: #64748b !important; font-size: 0.75rem !important; }
+.stTextInput label { color: #71717a !important; font-size: 0.74rem !important; font-weight: 500 !important; }
 
-/* ── Chat input ───────────────────────────────────────────── */
 [data-testid="stChatInput"] {
-  background: rgba(30,41,59,0.8) !important;
-  border: 1px solid rgba(148,163,184,0.12) !important;
-  border-radius: 12px !important;
-  backdrop-filter: blur(8px) !important;
+  background: #ffffff !important;
+  border: 1px solid #e4e4e7 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
 }
 [data-testid="stChatInput"]:focus-within {
-  border-color: rgba(124,92,252,0.4) !important;
-  box-shadow: 0 0 0 3px rgba(124,92,252,0.08) !important;
+  border-color: #4f46e5 !important;
+  box-shadow: 0 0 0 3px rgba(79,70,229,0.08), 0 1px 4px rgba(0,0,0,0.06) !important;
 }
 [data-testid="stChatInput"] textarea {
-  color: #f1f5f9 !important;
+  color: #18181b !important;
   background: transparent !important;
   font-family: 'Inter', sans-serif !important;
-  font-size: 0.88rem !important;
+  font-size: 0.875rem !important;
 }
-[data-testid="stChatInput"] textarea::placeholder { color: #475569 !important; }
-[data-testid="stChatInputSubmitButton"] svg { fill: #7c5cfc !important; }
+[data-testid="stChatInput"] textarea::placeholder { color: #a1a1aa !important; }
+[data-testid="stChatInputSubmitButton"] svg       { fill: #4f46e5 !important; }
 
-/* ── Chat messages ────────────────────────────────────────── */
+/* ── Chat messages ── */
 [data-testid="stChatMessage"] {
-  padding: 4px 0 !important;
-  gap: 12px !important;
+  padding: 2px 0 !important;
+  gap: 10px !important;
   background: transparent !important;
   border: none !important;
+  max-width: 860px !important;
+  margin: 0 auto !important;
 }
 [data-testid="stChatMessageContent"] {
-  background: rgba(30,41,59,0.55) !important;
-  border: 1px solid rgba(148,163,184,0.09) !important;
-  border-radius: 4px 14px 14px 14px !important;
-  padding: 12px 16px !important;
-  color: #e2e8f0 !important;
-  font-size: 0.88rem !important;
-  line-height: 1.7 !important;
-  backdrop-filter: blur(8px) !important;
-  max-width: 82% !important;
+  background: #ffffff !important;
+  border: 1px solid #e4e4e7 !important;
+  border-radius: 3px 12px 12px 12px !important;
+  padding: 11px 15px !important;
+  color: #18181b !important;
+  font-size: 0.875rem !important;
+  line-height: 1.68 !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+  max-width: 76% !important;
 }
 
-/* User message — flip layout & bubble color */
+/* user bubble */
 [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
   flex-direction: row-reverse !important;
 }
-[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stChatMessageContent"] {
-  background: rgba(124,92,252,0.13) !important;
-  border-color: rgba(124,92,252,0.25) !important;
-  border-radius: 14px 4px 14px 14px !important;
-  color: #e2e8f0 !important;
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"])
+  [data-testid="stChatMessageContent"] {
+  background: #18181b !important;
+  border: none !important;
+  border-radius: 12px 3px 12px 12px !important;
+  color: #fafafa !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15) !important;
+}
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"])
+  [data-testid="stChatMessageContent"] p,
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"])
+  [data-testid="stChatMessageContent"] li,
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"])
+  [data-testid="stChatMessageContent"] strong {
+  color: #fafafa !important;
 }
 
-/* Avatars */
+/* avatars */
 [data-testid="stChatMessageAvatarUser"],
 [data-testid="stChatMessageAvatarAssistant"] {
-  border-radius: 8px !important;
-  width: 32px !important;
-  height: 32px !important;
+  border-radius: 7px !important;
+  width: 30px !important;
+  height: 30px !important;
   flex-shrink: 0 !important;
 }
 [data-testid="stChatMessageAvatarAssistant"] {
-  background: linear-gradient(135deg, #7c5cfc 0%, #22d3ee 100%) !important;
+  background: #4f46e5 !important;
   border: none !important;
 }
 [data-testid="stChatMessageAvatarUser"] {
-  background: rgba(124,92,252,0.2) !important;
-  border: 1px solid rgba(124,92,252,0.3) !important;
+  background: #f4f4f5 !important;
+  border: 1px solid #e4e4e7 !important;
 }
 
-/* markdown inside messages */
-[data-testid="stChatMessageContent"] p { margin: 0 0 6px !important; }
-[data-testid="stChatMessageContent"] p:last-child { margin-bottom: 0 !important; }
-[data-testid="stChatMessageContent"] ul, [data-testid="stChatMessageContent"] ol {
-  padding-left: 18px !important; margin: 6px 0 !important;
-}
-[data-testid="stChatMessageContent"] li { margin: 3px 0 !important; }
-[data-testid="stChatMessageContent"] strong { color: #f1f5f9 !important; font-weight: 600 !important; }
+/* markdown inside bubbles */
+[data-testid="stChatMessageContent"] p                { margin: 0 0 5px !important; }
+[data-testid="stChatMessageContent"] p:last-child      { margin-bottom: 0 !important; }
+[data-testid="stChatMessageContent"] strong            { font-weight: 600 !important; }
+[data-testid="stChatMessageContent"] ul,
+[data-testid="stChatMessageContent"] ol               { padding-left: 16px !important; margin: 4px 0 !important; }
+[data-testid="stChatMessageContent"] li               { margin: 2px 0 !important; }
 [data-testid="stChatMessageContent"] code {
-  background: rgba(124,92,252,0.15) !important;
-  color: #a78bfa !important;
+  background: #f4f4f5 !important;
+  color: #4f46e5 !important;
   border-radius: 4px !important;
   padding: 1px 5px !important;
   font-size: 0.82rem !important;
 }
 
-/* ── File uploader ────────────────────────────────────────── */
+/* ── File uploader ── */
 [data-testid="stFileUploaderDropzone"] {
-  background: rgba(255,255,255,0.02) !important;
-  border: 1px dashed rgba(124,92,252,0.22) !important;
-  border-radius: 10px !important;
-  transition: all 0.2s ease !important;
+  background: #fafafa !important;
+  border: 1.5px dashed #d4d4d8 !important;
+  border-radius: 9px !important;
+  transition: all 0.15s !important;
 }
 [data-testid="stFileUploaderDropzone"]:hover {
-  border-color: rgba(124,92,252,0.5) !important;
-  background: rgba(124,92,252,0.04) !important;
+  border-color: #4f46e5 !important;
+  background: #eef2ff !important;
 }
-[data-testid="stFileUploaderDropzoneInstructions"] { color: #475569 !important; font-size: 0.8rem !important; }
+[data-testid="stFileUploaderDropzoneInstructions"] { color: #a1a1aa !important; font-size: 0.78rem !important; }
 
-/* ── Progress bar ─────────────────────────────────────────── */
+/* ── Progress bar ── */
 [data-testid="stProgressBar"] > div > div {
-  background: linear-gradient(90deg, #7c5cfc, #22d3ee) !important;
-  border-radius: 4px !important;
+  background: #4f46e5 !important;
+  border-radius: 3px !important;
 }
+[data-testid="stProgressBar"] { background: #e4e4e7 !important; border-radius: 3px !important; }
 
-/* ── Expander ─────────────────────────────────────────────── */
+/* ── Expander ── */
 [data-testid="stExpander"] {
-  background: rgba(255,255,255,0.02) !important;
-  border: 1px solid rgba(148,163,184,0.08) !important;
-  border-radius: 10px !important;
+  background: #fafafa !important;
+  border: 1px solid #e4e4e7 !important;
+  border-radius: 8px !important;
 }
-[data-testid="stExpander"] summary {
-  color: #64748b !important;
-  font-size: 0.78rem !important;
-  font-weight: 500 !important;
-}
-[data-testid="stExpander"] summary:hover { color: #94a3b8 !important; }
+[data-testid="stExpander"] summary          { color: #71717a !important; font-size: 0.78rem !important; font-weight: 500 !important; }
+[data-testid="stExpander"] summary:hover    { color: #3f3f46 !important; }
 
-/* ── Alerts ───────────────────────────────────────────────── */
-[data-testid="stAlert"] { border-radius: 10px !important; border-width: 1px !important; }
+/* ── Alerts ── */
+[data-testid="stAlert"] { border-radius: 8px !important; font-size: 0.875rem !important; }
 
-/* ── Spinner ──────────────────────────────────────────────── */
-[data-testid="stSpinner"] > div { border-top-color: #7c5cfc !important; }
-
-/* ── Metrics ──────────────────────────────────────────────── */
-[data-testid="stMetricValue"] { color: #7c5cfc !important; font-weight: 600 !important; }
-[data-testid="stMetricLabel"] { color: #475569 !important; font-size: 0.7rem !important; letter-spacing: 0.04em !important; }
-[data-testid="stMetric"] { padding: 10px 14px !important; }
-
-/* ── Captions ─────────────────────────────────────────────── */
-.stCaption { color: #475569 !important; font-size: 0.72rem !important; }
+/* ── Spinner ── */
+[data-testid="stSpinner"] > div { border-top-color: #4f46e5 !important; }
 </style>
-"""
-st.markdown(CSS, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 
 # ── API key ────────────────────────────────────────────────────────────────────
@@ -283,76 +278,76 @@ def _init():
 
 _init()
 
-
-# ── Helpers ────────────────────────────────────────────────────────────────────
 def _ts() -> str:
     return datetime.now().strftime("%H:%M")
-
 
 def _ingest_file(file) -> int:
     file_bytes = file.read()
     chunks = process_document(file_bytes, file.name)
-    texts = [c["text"] for c in chunks]
-    embeddings = get_embeddings(texts)
+    embeddings = get_embeddings([c["text"] for c in chunks])
     st.session_state.vector_store.add(chunks, embeddings)
     return len(chunks)
 
 
 # ── Sidebar ────────────────────────────────────────────────────────────────────
 with st.sidebar:
+    kb: VectorStore = st.session_state.vector_store
 
-    # Logo
+    # Brand
     st.markdown("""
-<div style="display:flex;align-items:center;gap:10px;margin-bottom:24px;">
-  <div style="
-    width:36px;height:36px;border-radius:10px;
-    background:linear-gradient(135deg,#7c5cfc,#22d3ee);
-    display:flex;align-items:center;justify-content:center;
-    font-size:1rem;flex-shrink:0;">💬</div>
+<div style="display:flex;align-items:center;gap:9px;margin-bottom:22px;">
+  <div style="width:32px;height:32px;background:#4f46e5;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0;">
+    💬
+  </div>
   <div>
-    <div style="color:#f1f5f9;font-weight:600;font-size:0.95rem;letter-spacing:-0.01em;">FAQ Assistant</div>
-    <div style="color:#475569;font-size:0.7rem;margin-top:1px;">Powered by Groq · RAG</div>
+    <div style="font-size:0.9rem;font-weight:600;color:#18181b;letter-spacing:-0.01em;">
+      FAQ Assistant
+    </div>
+    <div style="font-size:0.68rem;color:#a1a1aa;margin-top:1px;">
+      Powered by Groq
+    </div>
   </div>
 </div>
 """, unsafe_allow_html=True)
 
-    # ── KB stats ───────────────────────────────────────────────────────────────
-    kb: VectorStore = st.session_state.vector_store
+    # Section label
+    st.markdown("""<div style="font-size:0.68rem;font-weight:600;letter-spacing:0.09em;
+color:#a1a1aa;text-transform:uppercase;margin-bottom:10px;">Knowledge Base</div>""",
+                unsafe_allow_html=True)
 
+    # Stats
     col_a, col_b = st.columns(2)
     with col_a:
         st.markdown(f"""
-<div style="background:rgba(124,92,252,0.07);border:1px solid rgba(124,92,252,0.15);
-border-radius:10px;padding:10px 14px;">
-  <div style="color:#7c5cfc;font-size:1.3rem;font-weight:700;letter-spacing:-0.02em;">{kb.num_chunks}</div>
-  <div style="color:#475569;font-size:0.68rem;margin-top:2px;text-transform:uppercase;letter-spacing:0.06em;">Chunks</div>
+<div style="background:#f4f4f5;border-radius:8px;padding:9px 12px;">
+  <div style="font-size:1.15rem;font-weight:600;color:#18181b;letter-spacing:-0.02em;">
+    {kb.num_chunks}
+  </div>
+  <div style="font-size:0.68rem;color:#a1a1aa;margin-top:1px;">chunks</div>
 </div>""", unsafe_allow_html=True)
     with col_b:
         st.markdown(f"""
-<div style="background:rgba(34,211,238,0.07);border:1px solid rgba(34,211,238,0.15);
-border-radius:10px;padding:10px 14px;">
-  <div style="color:#22d3ee;font-size:1.3rem;font-weight:700;letter-spacing:-0.02em;">{len(kb.sources)}</div>
-  <div style="color:#475569;font-size:0.68rem;margin-top:2px;text-transform:uppercase;letter-spacing:0.06em;">Docs</div>
+<div style="background:#f4f4f5;border-radius:8px;padding:9px 12px;">
+  <div style="font-size:1.15rem;font-weight:600;color:#18181b;letter-spacing:-0.02em;">
+    {len(kb.sources)}
+  </div>
+  <div style="font-size:0.68rem;color:#a1a1aa;margin-top:1px;">documents</div>
 </div>""", unsafe_allow_html=True)
 
-    st.markdown("<div style='margin-top:16px'></div>", unsafe_allow_html=True)
-
-    # ── Knowledge Base ─────────────────────────────────────────────────────────
-    st.markdown("""<div style="color:#334155;font-size:0.68rem;font-weight:600;
-letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">Knowledge Base</div>""",
-                unsafe_allow_html=True)
+    st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
 
     uploaded_files = st.file_uploader(
-        "drop files here",
+        "Upload files",
         type=["pdf", "txt", "docx"],
         accept_multiple_files=True,
         label_visibility="collapsed",
     )
 
-    s_col, u_col = st.columns(2)
-    with s_col:
-        load_sample = st.button("Load Sample", use_container_width=True)
-    with u_col:
+    c1, c2 = st.columns(2)
+    with c1:
+        load_sample = st.button("Load sample", use_container_width=True)
+    with c2:
         process_btn = st.button(
             "Process",
             use_container_width=True,
@@ -367,11 +362,10 @@ letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">Knowledge Bas
                     raw = f.read()
                 kb.remove_source("sample_faq.txt")
                 chunks = process_document(raw, "sample_faq.txt")
-                embs = get_embeddings([c["text"] for c in chunks])
-                kb.add(chunks, embs)
+                kb.add(chunks, get_embeddings([c["text"] for c in chunks]))
                 if "sample_faq.txt" not in st.session_state.indexed_docs:
                     st.session_state.indexed_docs.append("sample_faq.txt")
-                st.toast(f"Loaded {len(chunks)} chunks", icon="✅")
+                st.toast(f"{len(chunks)} chunks indexed", icon="✅")
                 st.rerun()
             except Exception as e:
                 st.error(str(e))
@@ -380,31 +374,32 @@ letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">Knowledge Bas
         bar = st.progress(0, text="")
         total = 0
         for i, uf in enumerate(uploaded_files):
-            bar.progress(i / len(uploaded_files), text=f"{uf.name}")
+            bar.progress(i / len(uploaded_files), text=uf.name)
             try:
-                n = _ingest_file(uf)
-                total += n
+                total += _ingest_file(uf)
                 if uf.name not in st.session_state.indexed_docs:
                     st.session_state.indexed_docs.append(uf.name)
             except Exception as e:
                 st.error(f"{uf.name}: {e}")
         bar.progress(1.0, text="Done")
-        time.sleep(0.6)
+        time.sleep(0.5)
         bar.empty()
         st.toast(f"{total} chunks from {len(uploaded_files)} file(s)", icon="✅")
         st.rerun()
 
-    # Indexed doc list
+    # Indexed docs
     if kb.sources:
-        st.markdown("<div style='margin-top:12px'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
         for src in kb.sources:
             c1, c2 = st.columns([5, 1])
             with c1:
-                st.markdown(f"""<div style="color:#64748b;font-size:0.75rem;
-padding:4px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-📄 {src}</div>""", unsafe_allow_html=True)
+                label = src if len(src) <= 26 else src[:23] + "…"
+                st.markdown(f"""<div style="font-size:0.75rem;color:#71717a;
+padding:3px 0;display:flex;align-items:center;gap:5px;">
+  <span style="color:#d4d4d8;">📄</span> {label}
+</div>""", unsafe_allow_html=True)
             with c2:
-                if st.button("✕", key=f"rm_{src}", help=f"Remove {src}"):
+                if st.button("✕", key=f"rm_{src}"):
                     kb.remove_source(src)
                     if src in st.session_state.indexed_docs:
                         st.session_state.indexed_docs.remove(src)
@@ -412,31 +407,31 @@ padding:4px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
 
     st.divider()
 
-    # ── Conversation history ───────────────────────────────────────────────────
-    st.markdown("""<div style="color:#334155;font-size:0.68rem;font-weight:600;
-letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">History</div>""",
+    # History
+    st.markdown("""<div style="font-size:0.68rem;font-weight:600;letter-spacing:0.09em;
+color:#a1a1aa;text-transform:uppercase;margin-bottom:10px;">History</div>""",
                 unsafe_allow_html=True)
 
     log = st.session_state.conversation_log
     if log:
-        for entry in reversed(log[-12:]):
+        for entry in reversed(log[-10:]):
             st.markdown(f"""
-<div style="padding:7px 10px;border-radius:8px;background:rgba(255,255,255,0.02);
-border:1px solid rgba(148,163,184,0.07);margin-bottom:5px;">
-  <div style="color:#94a3b8;font-size:0.78rem;white-space:nowrap;
+<div style="padding:7px 9px;border-radius:7px;background:#fafafa;
+border:1px solid #f4f4f5;margin-bottom:5px;">
+  <div style="font-size:0.78rem;color:#52525b;white-space:nowrap;
 overflow:hidden;text-overflow:ellipsis;">
-    {entry['question'][:48]}{'…' if len(entry['question']) > 48 else ''}
+    {entry['question'][:46]}{'…' if len(entry['question']) > 46 else ''}
   </div>
-  <div style="color:#334155;font-size:0.65rem;margin-top:3px;">{entry['timestamp']}</div>
+  <div style="font-size:0.65rem;color:#a1a1aa;margin-top:2px;">{entry['timestamp']}</div>
 </div>""", unsafe_allow_html=True)
 
-        if st.button("Clear chat", use_container_width=True):
+        if st.button("Clear conversation", use_container_width=True):
             st.session_state.messages = []
             st.session_state.conversation_log = []
             st.rerun()
     else:
-        st.markdown("""<div style="color:#334155;font-size:0.78rem;
-padding:8px 0;">No conversations yet.</div>""", unsafe_allow_html=True)
+        st.markdown("""<div style="font-size:0.78rem;color:#a1a1aa;padding:4px 0;">
+No conversations yet.</div>""", unsafe_allow_html=True)
 
 
 # ── Guard ──────────────────────────────────────────────────────────────────────
@@ -450,39 +445,33 @@ if not GROQ_API_KEY:
     st.stop()
 
 
-# ── Main area ──────────────────────────────────────────────────────────────────
+# ── Main ───────────────────────────────────────────────────────────────────────
 kb_ready = kb.num_chunks > 0
 
 # Header
-status_dot = (
-    '<span style="color:#22d3ee">●</span> Ready'
-    if kb_ready else
-    '<span style="color:#334155">●</span> No docs'
-)
+status_color = "#10b981" if kb_ready else "#d4d4d8"
+status_label = "Ready" if kb_ready else "No documents"
 st.markdown(f"""
-<div style="
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 4px;margin-bottom:28px;">
+<div style="display:flex;align-items:center;justify-content:space-between;
+max-width:860px;margin:0 auto 28px;padding:0 2px;">
   <div>
-    <h1 style="
-      margin:0;font-size:1.5rem;font-weight:600;letter-spacing:-0.03em;
-      background:linear-gradient(135deg,#a78bfa,#22d3ee);
-      -webkit-background-clip:text;-webkit-text-fill-color:transparent;">
-      Smart FAQ Chatbot
+    <h1 style="font-size:1.15rem;font-weight:600;color:#18181b;
+margin:0;letter-spacing:-0.02em;">
+      FAQ Assistant
     </h1>
-    <p style="margin:4px 0 0;font-size:0.8rem;color:#475569;">
-      Retrieval-Augmented Generation · Business Intelligence Midterm
+    <p style="font-size:0.78rem;color:#a1a1aa;margin:3px 0 0;">
+      Ask anything — I'll search the knowledge base and answer clearly.
     </p>
   </div>
-  <div style="
-    font-size:0.72rem;font-weight:500;color:#64748b;
-    background:rgba(255,255,255,0.03);
-    border:1px solid rgba(148,163,184,0.1);
-    border-radius:20px;padding:5px 12px;">
-    {status_dot}
+  <div style="display:flex;align-items:center;gap:6px;
+background:#ffffff;border:1px solid #e4e4e7;border-radius:20px;
+padding:5px 12px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+    <div style="width:7px;height:7px;border-radius:50%;background:{status_color};"></div>
+    <span style="font-size:0.72rem;font-weight:500;color:#71717a;">{status_label}</span>
   </div>
 </div>
 """, unsafe_allow_html=True)
+
 
 SUGGESTIONS = [
     "What pricing plans are available?",
@@ -490,72 +479,77 @@ SUGGESTIONS = [
     "What is Business Intelligence?",
     "Do you offer a free trial?",
     "How do I contact support?",
-    "What data connectors are supported?",
+    "What data connectors do you support?",
 ]
 
-# ── Chat messages ──────────────────────────────────────────────────────────────
+# ── Messages ───────────────────────────────────────────────────────────────────
 if not st.session_state.messages:
-    # Welcome state
     st.markdown("""
-<div style="
-  text-align:center;padding:60px 20px 40px;
-  max-width:520px;margin:0 auto;">
-  <div style="
-    width:56px;height:56px;border-radius:16px;
-    background:linear-gradient(135deg,#7c5cfc,#22d3ee);
-    display:flex;align-items:center;justify-content:center;
-    font-size:1.4rem;margin:0 auto 20px;">💬</div>
-  <h3 style="color:#e2e8f0;font-size:1.15rem;font-weight:600;
-letter-spacing:-0.02em;margin-bottom:8px;">
-    Ask anything about the knowledge base
-  </h3>
-  <p style="color:#475569;font-size:0.85rem;line-height:1.7;">
-    Upload FAQ documents or load the sample, then start chatting.<br>
-    The AI searches your docs and generates accurate answers.
+<div style="text-align:center;padding:64px 20px 40px;max-width:460px;margin:0 auto;">
+  <div style="width:44px;height:44px;background:#ffffff;border:1px solid #e4e4e7;
+border-radius:11px;display:flex;align-items:center;justify-content:center;
+font-size:1.1rem;margin:0 auto 16px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+    💬
+  </div>
+  <h2 style="font-size:1rem;font-weight:600;color:#18181b;margin:0 0 6px;
+letter-spacing:-0.01em;">
+    Start a conversation
+  </h2>
+  <p style="font-size:0.82rem;color:#71717a;line-height:1.65;margin:0;">
+    Upload your FAQ documents in the sidebar, then ask questions.<br>
+    I'll find the most relevant answers from your knowledge base.
   </p>
 </div>
 """, unsafe_allow_html=True)
 
     if kb_ready:
-        st.markdown("""<p style="text-align:center;color:#334155;
-font-size:0.75rem;font-weight:600;letter-spacing:0.08em;
-text-transform:uppercase;margin-bottom:12px;">Try asking</p>""",
-                    unsafe_allow_html=True)
+        st.markdown("""<p style="text-align:center;font-size:0.7rem;font-weight:600;
+letter-spacing:0.08em;text-transform:uppercase;color:#a1a1aa;margin-bottom:10px;">
+Suggested questions</p>""", unsafe_allow_html=True)
         cols = st.columns(3)
         for i, sug in enumerate(SUGGESTIONS):
             with cols[i % 3]:
                 if st.button(sug, key=f"sug_{i}", use_container_width=True):
                     st.session_state.pending_question = sug
                     st.rerun()
+
 else:
+    # Wrap messages in a max-width container
+    st.markdown('<div style="max-width:860px;margin:0 auto;">', unsafe_allow_html=True)
     for msg in st.session_state.messages:
         avatar = "🤖" if msg["role"] == "assistant" else "👤"
         with st.chat_message(msg["role"], avatar=avatar):
             st.markdown(msg["content"])
             sources = msg.get("sources", [])
             if sources:
-                with st.expander(f"↗ {len(sources)} source{'s' if len(sources)>1 else ''} retrieved"):
+                with st.expander(f"↗ {len(sources)} source{'s' if len(sources) > 1 else ''} used"):
                     for chunk, score in sources:
                         st.markdown(
-                            f"**{chunk['source']}** &nbsp;·&nbsp; "
-                            f"<span style='color:#7c5cfc;font-size:0.78rem'>{score:.0%} match</span>",
+                            f"**{chunk['source']}** &nbsp;"
+                            f"<span style='color:#a1a1aa;font-size:0.75rem;'>"
+                            f"{score:.0%} match</span>",
                             unsafe_allow_html=True,
                         )
-                        st.caption(chunk["text"][:280] + ("…" if len(chunk["text"]) > 280 else ""))
-                        st.divider()
+                        st.caption(chunk["text"][:260] + ("…" if len(chunk["text"]) > 260 else ""))
+                        if chunk != sources[-1][0]:
+                            st.divider()
             if msg.get("timestamp"):
                 st.markdown(
-                    f"<div style='color:#334155;font-size:0.68rem;margin-top:4px;'>"
+                    f"<div style='font-size:0.67rem;color:#a1a1aa;margin-top:5px;'>"
                     f"{msg['timestamp']}</div>",
                     unsafe_allow_html=True,
                 )
+    st.markdown("</div>", unsafe_allow_html=True)
 
-# ── Chat input ─────────────────────────────────────────────────────────────────
+
+# ── Input ──────────────────────────────────────────────────────────────────────
 if not kb_ready:
     st.markdown("""
-<div style="text-align:center;padding:20px;color:#475569;font-size:0.85rem;">
-  Load the <strong style="color:#64748b">Sample FAQ</strong> or upload documents
-  in the sidebar to start chatting.
+<div style="text-align:center;padding:16px;max-width:860px;margin:0 auto;">
+  <span style="font-size:0.82rem;color:#a1a1aa;">
+    Load the <strong style="color:#71717a;font-weight:500;">sample FAQ</strong>
+    or upload documents in the sidebar to start chatting.
+  </span>
 </div>""", unsafe_allow_html=True)
 else:
     user_input = st.chat_input("Ask a question…")
@@ -596,10 +590,8 @@ else:
             "timestamp": _ts(),
             "sources": sources,
         })
-
         st.session_state.conversation_log.append({
             "question": question,
             "timestamp": datetime.now().strftime("%d %b %H:%M"),
         })
-
         st.rerun()
