@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import functools
 from typing import List, Dict, Tuple
 
-from openai import OpenAI
+from groq import Groq
 
 from .vector_store import VectorStore
 
@@ -19,12 +20,15 @@ Guidelines:
 - Keep answers focused and avoid unnecessary repetition."""
 
 
-def get_embeddings(texts: List[str], client: OpenAI) -> List[List[float]]:
-    response = client.embeddings.create(
-        model="text-embedding-3-small",
-        input=texts,
-    )
-    return [item.embedding for item in response.data]
+@functools.lru_cache(maxsize=1)
+def _embedding_model():
+    from sentence_transformers import SentenceTransformer
+    return SentenceTransformer("all-MiniLM-L6-v2")
+
+
+def get_embeddings(texts: List[str]) -> List[List[float]]:
+    model = _embedding_model()
+    return model.encode(texts, convert_to_numpy=True).tolist()
 
 
 def build_context(results: List[Tuple[Dict, float]]) -> str:
@@ -42,12 +46,12 @@ def generate_answer(
     query: str,
     context: str,
     conversation_history: List[Dict],
-    client: OpenAI,
-    model: str = "gpt-4o-mini",
+    api_key: str,
+    model: str = "llama-3.3-70b-versatile",
 ) -> str:
+    client = Groq(api_key=api_key)
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
-    # Include the last 6 turns of conversation for continuity
     for turn in conversation_history[-6:]:
         messages.append({"role": turn["role"], "content": turn["content"]})
 
@@ -74,11 +78,8 @@ def query(
     api_key: str,
     top_k: int = 4,
 ) -> Tuple[str, List[Tuple[Dict, float]]]:
-    client = OpenAI(api_key=api_key)
-
-    query_embedding = get_embeddings([question], client)[0]
+    query_embedding = get_embeddings([question])[0]
     results = vector_store.search(query_embedding, top_k=top_k)
     context = build_context(results)
-    answer = generate_answer(question, context, conversation_history, client)
-
+    answer = generate_answer(question, context, conversation_history, api_key)
     return answer, results

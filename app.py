@@ -27,7 +27,7 @@ st.set_page_config(
 # ── Imports after page config ───────────────────────────────────────────────
 from utils.document_processor import process_document
 from utils.vector_store import VectorStore
-from utils.rag_pipeline import get_embeddings, query as rag_query
+from utils.rag_pipeline import get_embeddings, query as rag_query  # embeddings via sentence-transformers
 
 # ── Custom CSS ──────────────────────────────────────────────────────────────
 st.markdown("""
@@ -166,14 +166,23 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
+# ── API key — loaded once from Streamlit Secrets or environment ──────────────
+def _load_api_key() -> str:
+    try:
+        return st.secrets["GROQ_API_KEY"]
+    except Exception:
+        return os.environ.get("GROQ_API_KEY", "")
+
+GROQ_API_KEY = _load_api_key()
+
+
 # ── Session state initialisation ────────────────────────────────────────────
 def _init():
     defaults = {
         "messages": [],
         "vector_store": VectorStore(),
-        "api_key": os.environ.get("OPENAI_API_KEY", ""),
-        "indexed_docs": [],          # list of doc names
-        "conversation_log": [],       # sidebar history entries
+        "indexed_docs": [],
+        "conversation_log": [],
         "pending_question": "",
     }
     for k, v in defaults.items():
@@ -252,36 +261,14 @@ def _ingest_file(file) -> int:
     file_bytes = file.read()
     chunks = process_document(file_bytes, file.name)
 
-    from openai import OpenAI
-    client = OpenAI(api_key=st.session_state.api_key)
     texts = [c["text"] for c in chunks]
-    embeddings = get_embeddings(texts, client)
+    embeddings = get_embeddings(texts)
     st.session_state.vector_store.add(chunks, embeddings)
     return len(chunks)
 
 
 # ── Sidebar ──────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown('<div class="sidebar-title">⚙️ Configuration</div>', unsafe_allow_html=True)
-
-    api_key_input = st.text_input(
-        "OpenAI API Key",
-        type="password",
-        value=st.session_state.api_key,
-        placeholder="sk-...",
-        help="Get your key at platform.openai.com",
-    )
-    if api_key_input:
-        st.session_state.api_key = api_key_input
-
-    api_ok = bool(st.session_state.api_key and st.session_state.api_key.startswith("sk-"))
-    if api_ok:
-        st.success("API key set ✓", icon="🔑")
-    else:
-        st.warning("Enter your OpenAI API key to start.", icon="⚠️")
-
-    st.divider()
-
     # ── Knowledge Base ──────────────────────────────────────────────────────
     st.markdown('<div class="sidebar-title">📚 Knowledge Base</div>', unsafe_allow_html=True)
 
@@ -312,36 +299,28 @@ with st.sidebar:
     sample_col, upload_col = st.columns(2)
     with sample_col:
         if st.button("Load Sample FAQ", use_container_width=True, help="Load the built-in TechCorp FAQ"):
-            if not api_ok:
-                st.error("Set API key first.")
-            else:
-                with st.spinner("Indexing sample FAQ…"):
-                    try:
-                        with open("data/sample_faq.txt", "rb") as f:
-                            sample_bytes = f.read()
-
-                        # Remove old sample if present
-                        kb.remove_source("sample_faq.txt")
-
-                        from utils.document_processor import process_document as _pd
-                        chunks = _pd(sample_bytes, "sample_faq.txt")
-                        from openai import OpenAI
-                        client = OpenAI(api_key=st.session_state.api_key)
-                        texts = [c["text"] for c in chunks]
-                        embs  = get_embeddings(texts, client)
-                        kb.add(chunks, embs)
-                        if "sample_faq.txt" not in st.session_state.indexed_docs:
-                            st.session_state.indexed_docs.append("sample_faq.txt")
-                        st.success(f"Loaded {len(chunks)} chunks!")
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"Error: {e}")
+            with st.spinner("Indexing sample FAQ…"):
+                try:
+                    with open("data/sample_faq.txt", "rb") as f:
+                        sample_bytes = f.read()
+                    kb.remove_source("sample_faq.txt")
+                    from utils.document_processor import process_document as _pd
+                    chunks = _pd(sample_bytes, "sample_faq.txt")
+                    texts = [c["text"] for c in chunks]
+                    embs  = get_embeddings(texts)
+                    kb.add(chunks, embs)
+                    if "sample_faq.txt" not in st.session_state.indexed_docs:
+                        st.session_state.indexed_docs.append("sample_faq.txt")
+                    st.success(f"Loaded {len(chunks)} chunks!")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Error: {e}")
 
     with upload_col:
         process_btn = st.button(
             "Process Files",
             use_container_width=True,
-            disabled=(not uploaded_files or not api_ok),
+            disabled=not uploaded_files,
             type="primary",
         )
 
@@ -399,8 +378,18 @@ with st.sidebar:
 
     st.divider()
     st.caption("🤖 Smart FAQ Chatbot · RAG · BI Midterm")
-    st.caption("Powered by OpenAI + Streamlit")
+    st.caption("Powered by Groq + Streamlit")
 
+
+# ── Guard: stop if API key is not configured (admin issue, not user issue) ───
+if not GROQ_API_KEY:
+    st.error(
+        "**Configuration error:** `GROQ_API_KEY` is not set.\n\n"
+        "Add it under **App Settings → Secrets** on Streamlit Cloud, or set the "
+        "`GROQ_API_KEY` environment variable when running locally.",
+        icon="🔑",
+    )
+    st.stop()
 
 # ── Main content area ─────────────────────────────────────────────────────────
 kb_ready = kb.num_chunks > 0
@@ -463,9 +452,7 @@ with chat_container:
 # ── Chat input ────────────────────────────────────────────────────────────────
 st.markdown("<br>", unsafe_allow_html=True)
 
-if not api_ok:
-    st.info("🔑 Please enter your OpenAI API key in the sidebar to start chatting.", icon="ℹ️")
-elif not kb_ready:
+if not kb_ready:
     st.info("📚 Load the Sample FAQ or upload your own documents in the sidebar to begin.", icon="ℹ️")
 else:
     user_input = st.chat_input(
@@ -501,7 +488,7 @@ else:
                     question=question,
                     vector_store=kb,
                     conversation_history=history,
-                    api_key=st.session_state.api_key,
+                    api_key=GROQ_API_KEY,
                 )
             except Exception as e:
                 answer = f"⚠️ An error occurred: {e}"
