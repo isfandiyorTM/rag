@@ -1,0 +1,246 @@
+Business Intelligence Knowledge Base
+=====================================
+TechCorp Analytics Solutions — Internal Reference Guide
+Version 2.0 | Last Updated: June 2026
+
+======================================================
+PART 1: BUSINESS INTELLIGENCE FUNDAMENTALS
+======================================================
+
+Q: What is Business Intelligence (BI)?
+A: Business Intelligence (BI) is a set of technologies, processes, and practices that collect, integrate, analyse, and present business data to help organisations make better decisions. BI transforms raw data into meaningful insights through dashboards, reports, charts, and data visualisations. The ultimate goal is to answer the question: "What is happening in our business and why?"
+
+Q: What are the four types of analytics in BI?
+A: There are four levels of analytics, each more complex than the last:
+1. Descriptive Analytics — answers "What happened?" by summarising historical data (e.g., monthly sales reports, revenue dashboards).
+2. Diagnostic Analytics — answers "Why did it happen?" by identifying patterns and root causes (e.g., why did sales drop in Q3?).
+3. Predictive Analytics — answers "What will happen?" using statistical models and machine learning (e.g., forecasting next quarter's revenue).
+4. Prescriptive Analytics — answers "What should we do?" by recommending actions (e.g., optimal pricing strategies, inventory levels).
+
+Q: What is the difference between BI and Data Analytics?
+A: BI primarily focuses on descriptive and diagnostic analytics using structured, historical data to monitor business performance. Data Analytics is broader and includes predictive and prescriptive analytics, often involving unstructured data, machine learning, and statistical modelling. In practice, modern BI platforms increasingly incorporate all four analytics types.
+
+Q: What is a BI strategy?
+A: A BI strategy is a roadmap that defines how an organisation will use data to achieve its business goals. Key components include: identifying key business questions, defining KPIs, selecting appropriate BI tools, establishing data governance policies, planning data architecture (warehouses, pipelines), defining user roles and access, and setting a rollout timeline. A strong BI strategy aligns data initiatives with business objectives.
+
+Q: What is self-service BI?
+A: Self-service BI allows business users (non-technical staff) to access, analyse, and visualise data independently without relying on IT or data analysts. Self-service BI tools provide drag-and-drop interfaces, pre-built connectors, and guided analytics. Benefits include faster decision-making, reduced IT bottlenecks, and greater data democratisation across the organisation. TechCorp's platform is a self-service BI solution.
+
+Q: What is data democratisation?
+A: Data democratisation is the process of making data accessible to all employees in an organisation, regardless of their technical background. It involves providing intuitive tools, training, and governance frameworks so that everyone — from executives to frontline managers — can make data-driven decisions. The goal is to eliminate data silos and create a data-driven culture.
+
+======================================================
+PART 2: DATA WAREHOUSING AND DATA PIPELINES
+======================================================
+
+Q: What is a data warehouse?
+A: A data warehouse is a centralised repository that stores large volumes of structured, historical data from multiple source systems. Unlike operational databases (designed for transactions), data warehouses are optimised for analytical queries — reading large datasets quickly. Data is organised into fact tables (measurable events) and dimension tables (contextual attributes). Examples: Amazon Redshift, Google BigQuery, Snowflake, Microsoft Azure Synapse.
+
+Q: What is the difference between a database and a data warehouse?
+A: Operational databases (OLTP — Online Transaction Processing) are designed for real-time transactions: INSERT, UPDATE, DELETE operations. They store current data and prioritise write speed. Data warehouses (OLAP — Online Analytical Processing) are designed for read-heavy analytical queries across large historical datasets. They prioritise query performance and store years of data. A typical workflow: data flows from operational databases → ETL pipeline → data warehouse → BI tool.
+
+Q: What is a data mart?
+A: A data mart is a subset of a data warehouse focused on a specific business department or subject area — for example, a Sales data mart, Finance data mart, or Marketing data mart. Data marts make it easier for specific teams to access the data most relevant to them without querying the entire warehouse. They can be created from the central data warehouse (dependent data mart) or built independently (independent data mart).
+
+Q: What is a data lake?
+A: A data lake is a centralised repository that stores raw, unstructured, semi-structured, and structured data at any scale. Unlike data warehouses (which require data to be structured before loading), data lakes store data in its native format and apply structure at query time (schema-on-read). Data lakes are ideal for storing log files, images, videos, IoT sensor data, and social media feeds. Common platforms: AWS S3 + Athena, Azure Data Lake, Google Cloud Storage.
+
+Q: What is ETL and how does it work?
+A: ETL stands for Extract, Transform, Load:
+- Extract: Pull data from source systems (databases, APIs, spreadsheets, CRM systems).
+- Transform: Clean, standardise, deduplicate, and reshape the data (e.g., convert date formats, join tables, calculate derived fields).
+- Load: Insert the transformed data into the destination (data warehouse or data mart).
+Modern alternatives include ELT (Extract, Load, Transform), where raw data is loaded first and transformations happen inside the warehouse using its compute power. Tools: dbt, Apache Spark, Talend, Informatica, Fivetran.
+
+Q: What is a data pipeline?
+A: A data pipeline is an automated sequence of processes that moves data from source systems to a destination (data warehouse, dashboard, or application). Pipelines handle extraction, transformation, validation, and loading. They can be batch-based (run at scheduled intervals) or streaming (process data in real-time). Well-designed pipelines are idempotent, monitored, and have error handling and retry logic.
+
+Q: What is a star schema?
+A: A star schema is a data modelling technique used in data warehouses. It consists of a central fact table (containing measurable metrics like sales amount, quantity sold) surrounded by dimension tables (containing descriptive attributes like product name, customer region, date). The schema resembles a star. Star schemas are denormalised for fast query performance and are the most common structure in BI data models.
+
+Q: What is the difference between a star schema and a snowflake schema?
+A: In a star schema, dimension tables are denormalised (flat). In a snowflake schema, dimension tables are normalised into multiple related tables, reducing data redundancy but increasing query complexity. Star schemas are preferred in BI for query performance; snowflake schemas are used when storage efficiency or data integrity is more important.
+
+======================================================
+PART 3: KEY PERFORMANCE INDICATORS (KPIs) AND METRICS
+======================================================
+
+Q: What is a KPI?
+A: A Key Performance Indicator (KPI) is a quantifiable metric that measures how effectively an organisation is achieving its key business objectives. Good KPIs are SMART: Specific, Measurable, Achievable, Relevant, and Time-bound. KPIs should be linked directly to strategic goals. Examples: Customer Acquisition Cost (CAC), Monthly Recurring Revenue (MRR), Net Promoter Score (NPS), Inventory Turnover Rate, Employee Retention Rate.
+
+Q: What is the difference between a KPI and a metric?
+A: All KPIs are metrics, but not all metrics are KPIs. A metric is any quantifiable measurement (e.g., number of website visits, number of support tickets). A KPI is a metric specifically chosen because it directly indicates progress toward a strategic business goal. For example, "page views" is a metric; "conversion rate" (tied to a revenue goal) is a KPI.
+
+Q: What are common financial KPIs?
+A: Common financial KPIs include:
+- Revenue Growth Rate: percentage increase in revenue over a period.
+- Gross Profit Margin: (Revenue - COGS) / Revenue × 100%.
+- Net Profit Margin: Net Income / Revenue × 100%.
+- EBITDA: Earnings Before Interest, Taxes, Depreciation, and Amortisation.
+- Return on Investment (ROI): (Net Profit / Cost of Investment) × 100%.
+- Operating Cash Flow: cash generated from core business operations.
+- Accounts Receivable Days (DSO): average days to collect payment after a sale.
+
+Q: What are common customer KPIs?
+A: Common customer KPIs include:
+- Customer Acquisition Cost (CAC): total marketing/sales spend divided by new customers acquired.
+- Customer Lifetime Value (CLV): total revenue expected from a customer over their relationship with the company.
+- Net Promoter Score (NPS): measures customer loyalty (scale -100 to +100).
+- Customer Churn Rate: percentage of customers who stop using a service in a period.
+- Customer Satisfaction Score (CSAT): average rating from post-interaction surveys.
+- First Response Time: average time for support team to first reply to a customer.
+
+Q: What are common operational KPIs?
+A: Common operational KPIs include:
+- Order Fulfilment Time: average time from order placement to delivery.
+- Inventory Turnover Rate: number of times inventory is sold/replaced in a period.
+- Employee Productivity: output per employee per unit of time.
+- On-Time Delivery Rate: percentage of orders delivered on schedule.
+- Defect Rate / Quality Rate: percentage of products meeting quality standards.
+- Capacity Utilisation: actual output as a percentage of maximum possible output.
+
+======================================================
+PART 4: BI TOOLS AND TECHNOLOGIES
+======================================================
+
+Q: What are the most popular BI tools?
+A: The leading BI tools in the market are:
+- Microsoft Power BI: widely used, strong Microsoft ecosystem integration, affordable.
+- Tableau: known for advanced visualisations and intuitive interface.
+- Looker (Google): strong data modelling with LookML, cloud-native.
+- Qlik Sense: associative data model, good for exploratory analysis.
+- Metabase: open-source, developer-friendly, easy to self-host.
+- TechCorp BI Platform: self-service, AI-powered, 200+ connectors, ideal for mid-to-large enterprises.
+
+Q: What is Power BI?
+A: Power BI is Microsoft's cloud-based BI tool. It includes Power BI Desktop (for report building), Power BI Service (cloud publishing and sharing), and Power BI Mobile. It integrates tightly with Excel, Azure, and Microsoft 365. Power BI uses DAX (Data Analysis Expressions) for calculated measures and Power Query (M language) for data transformation. It is free for individuals and priced per user for enterprise sharing.
+
+Q: What is Tableau?
+A: Tableau is a visual analytics platform owned by Salesforce. It is known for its drag-and-drop interface and powerful visualisation capabilities. Tableau uses a proprietary VizQL engine to translate visual interactions into database queries. It supports live connections and data extracts. Tableau Desktop creates reports; Tableau Server or Tableau Cloud publishes and shares them. It uses a calculated field language similar to SQL.
+
+Q: What is a dashboard?
+A: A dashboard is a visual display of key metrics and KPIs on a single screen, providing an at-a-glance overview of business performance. Good dashboards follow the "5-second rule": a viewer should understand the key insight within 5 seconds. Dashboards are typically categorised as: strategic (C-suite, high-level KPIs), operational (day-to-day monitoring), or analytical (deep-dive exploration).
+
+Q: What makes a good BI dashboard?
+A: Key principles of effective dashboard design:
+- Show only the most critical metrics (avoid clutter).
+- Use the right chart type for each data type (bar for comparisons, line for trends, pie only for part-to-whole with few categories).
+- Use consistent colour coding (red = bad, green = good).
+- Provide context with benchmarks, targets, or period comparisons.
+- Design for the audience — executives need high-level summaries, analysts need drill-down.
+- Ensure fast load times (< 5 seconds).
+- Make it mobile-responsive.
+
+Q: What chart type should I use for my data?
+A: General guidelines:
+- Bar chart: compare values across categories.
+- Line chart: show trends over time.
+- Pie / donut chart: part-to-whole relationships (use only with 2-5 segments).
+- Scatter plot: show correlation between two variables.
+- Heat map: show patterns across two dimensions (e.g., day × hour).
+- Funnel chart: conversion stages (e.g., sales pipeline).
+- Gauge chart: show a single value against a target.
+- Waterfall chart: show cumulative effect of sequential values (great for P&L).
+- Geographic map: data with a location dimension.
+
+======================================================
+PART 5: DATA GOVERNANCE AND DATA QUALITY
+======================================================
+
+Q: What is data governance?
+A: Data governance is the framework of policies, processes, roles, and standards that ensure data is accurate, consistent, secure, and used appropriately across an organisation. It defines who owns data, who can access it, how it should be stored, and how long it should be retained. Key roles: Chief Data Officer (CDO), Data Steward, Data Custodian. Good data governance reduces compliance risk and improves trust in analytics.
+
+Q: What is data quality?
+A: Data quality refers to how well data meets the requirements for its intended use. The six dimensions of data quality are:
+- Accuracy: data correctly represents real-world values.
+- Completeness: no missing values in required fields.
+- Consistency: data is the same across different systems.
+- Timeliness: data is up-to-date and available when needed.
+- Validity: data conforms to defined formats and rules.
+- Uniqueness: no duplicate records.
+
+Q: What is a data dictionary?
+A: A data dictionary is a centralised reference document that defines every data element in a system — its name, data type, format, allowed values, source, and business definition. For example: "customer_id — INTEGER — unique identifier for each customer — source: CRM system — cannot be NULL." Data dictionaries are essential for maintaining consistency across teams and BI reports.
+
+Q: What is data lineage?
+A: Data lineage tracks the origin, movement, transformation, and destination of data throughout its lifecycle — from source systems through pipelines to final reports. It answers: "Where did this number come from?" Data lineage is critical for debugging data issues, regulatory compliance (GDPR, SOX), and building trust in analytics. Tools: Apache Atlas, Alation, dbt's built-in lineage graph.
+
+Q: What is GDPR and how does it affect BI?
+A: GDPR (General Data Protection Regulation) is a European data privacy law that governs how organisations collect, store, and use personal data of EU residents. In BI, GDPR requires: minimising data collected to what is necessary, implementing row-level security to restrict access to personal data, supporting data deletion requests (right to be forgotten), maintaining records of data processing activities, and encrypting personal data at rest and in transit.
+
+======================================================
+PART 6: BI PROJECT IMPLEMENTATION
+======================================================
+
+Q: What are the phases of a BI project?
+A: A typical BI project follows these phases:
+1. Discovery & Requirements: identify business questions, KPIs, data sources, and stakeholders.
+2. Data Assessment: audit data quality, availability, and gaps in source systems.
+3. Architecture Design: design data warehouse schema, pipeline architecture, and tool selection.
+4. ETL Development: build data pipelines to extract, transform, and load data.
+5. Dashboard & Report Development: create visualisations aligned with requirements.
+6. Testing & Validation: verify data accuracy, performance, and security.
+7. Training & Change Management: train users and drive adoption.
+8. Deployment & Monitoring: release to production and monitor for issues.
+
+Q: What are common challenges in BI implementation?
+A: Common challenges include:
+- Data silos: data locked in separate systems with no integration.
+- Poor data quality: inconsistent, incomplete, or inaccurate source data.
+- Lack of stakeholder buy-in: users who don't trust or adopt the new system.
+- Scope creep: expanding requirements that delay delivery.
+- Performance issues: slow dashboards due to poorly optimised queries.
+- Skill gaps: insufficient data engineering or analytics expertise.
+- Governance gaps: no clear data ownership or definitions.
+
+Q: How do you measure the ROI of a BI project?
+A: BI ROI is measured by comparing benefits to costs. Benefits include: time saved on manual reporting (hours × headcount cost), faster decision-making (revenue impact), reduction in errors (cost avoidance), and new revenue from data-driven insights. Costs include: licensing fees, implementation costs, training, and ongoing maintenance. A common formula: ROI = (Total Benefits - Total Costs) / Total Costs × 100%.
+
+Q: What is agile BI?
+A: Agile BI applies agile software development principles to BI projects — delivering value in short sprints (1–3 weeks) rather than through long waterfall projects. Each sprint delivers working dashboards or data pipelines that stakeholders can review and provide feedback on. Benefits: faster time to value, better alignment with business needs, and ability to adapt to changing requirements. Agile BI works best when paired with iterative data modelling approaches like the Data Vault methodology.
+
+======================================================
+PART 7: ADVANCED BI CONCEPTS
+======================================================
+
+Q: What is augmented analytics?
+A: Augmented analytics uses artificial intelligence (AI) and machine learning (ML) to automate data preparation, insight discovery, and natural language generation. Instead of users manually building queries, augmented analytics surfaces insights automatically — for example: "Sales in the North region dropped 12% this week, driven by a 30% decline in Product Category B." TechCorp's AI Insights module is an augmented analytics feature.
+
+Q: What is natural language processing (NLP) in BI?
+A: NLP in BI allows users to query data using plain English questions instead of SQL or point-and-click interfaces. For example, a user can type "show me top 10 customers by revenue last quarter" and the BI tool generates the appropriate query and visualisation. NLP-powered BI reduces the technical barrier to data access and speeds up ad-hoc analysis.
+
+Q: What is embedded analytics?
+A: Embedded analytics is the integration of BI capabilities (dashboards, reports, charts) directly into third-party applications, websites, or portals — so users can access insights without leaving their workflow. For example, embedding a revenue dashboard into a CRM tool so salespeople see performance data while managing deals. Embedded analytics improves adoption because users access insights in context.
+
+Q: What is a semantic layer in BI?
+A: A semantic layer is a business-friendly abstraction built on top of raw database tables. It maps technical field names (e.g., "cust_acq_dt") to business terms (e.g., "Customer Acquisition Date") and pre-defines metrics, KPIs, and hierarchies. The semantic layer ensures every report and user sees consistent definitions — preventing situations where two teams report different revenue figures because they calculated it differently.
+
+Q: What is real-time BI?
+A: Real-time BI delivers up-to-the-second data insights, enabling immediate responses to business events. It requires streaming data architectures (Apache Kafka, AWS Kinesis) to ingest and process data as it is generated. Use cases: fraud detection (banking), live inventory monitoring (retail), operational dashboards (logistics), and live event monitoring (e-commerce flash sales). Real-time BI is more complex and costly than batch BI and should only be used when truly needed.
+
+Q: What is a data mesh?
+A: A data mesh is a decentralised data architecture approach where domain teams (e.g., Sales, Finance, Engineering) own and publish their own data as "data products," rather than centralising everything in a single data warehouse owned by a central data team. Data mesh emphasises domain ownership, self-serve infrastructure, federated governance, and treating data as a product. It addresses scalability challenges in large organisations but requires strong governance to prevent fragmentation.
+
+======================================================
+PART 8: BI CAREER AND ROLES
+======================================================
+
+Q: What is the role of a BI Analyst?
+A: A BI Analyst bridges the gap between business stakeholders and data. Responsibilities include: gathering business requirements, writing SQL queries, building dashboards and reports, analysing trends, creating KPI frameworks, and communicating insights to non-technical audiences. Key skills: SQL, Excel, at least one BI tool (Power BI, Tableau, or TechCorp), data visualisation principles, and business acumen.
+
+Q: What is the role of a Data Engineer?
+A: A Data Engineer designs, builds, and maintains the data infrastructure that BI relies on — pipelines, data warehouses, and integration systems. Responsibilities include: building ETL/ELT pipelines, optimising database performance, ensuring data quality, and managing cloud data platforms. Key skills: Python/Scala, SQL, Apache Spark, Kafka, dbt, and cloud platforms (AWS/GCP/Azure).
+
+Q: What is the role of a Data Scientist?
+A: A Data Scientist uses statistical analysis and machine learning to extract insights and build predictive models from data. Unlike BI Analysts (who focus on what happened), Data Scientists focus on why it happened and what will happen. Key skills: Python or R, machine learning frameworks (scikit-learn, TensorFlow), statistics, SQL, and data visualisation. Data Scientists often work alongside BI teams to integrate predictions into dashboards.
+
+Q: What SQL skills are essential for BI?
+A: Essential SQL skills for BI include:
+- SELECT with filtering (WHERE), sorting (ORDER BY), and grouping (GROUP BY, HAVING).
+- JOINs: INNER, LEFT, RIGHT, FULL OUTER — to combine data from multiple tables.
+- Window functions: ROW_NUMBER, RANK, LAG, LEAD, SUM OVER, AVG OVER — for running totals, rankings, and period comparisons.
+- CTEs (Common Table Expressions): WITH clause for readable, modular queries.
+- Subqueries and derived tables.
+- Date functions: DATEADD, DATEDIFF, DATE_TRUNC, EXTRACT.
+- CASE WHEN for conditional logic.
+- Aggregation functions: SUM, COUNT, AVG, MIN, MAX, COUNT DISTINCT.
