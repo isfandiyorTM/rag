@@ -1,0 +1,153 @@
+TechCorp Analytics Solutions — Company FAQ & Knowledge Base
+===========================================================
+
+SECTION 1: ABOUT THE COMPANY
+-------------------------------
+
+Q: What does TechCorp Analytics Solutions do?
+A: TechCorp Analytics Solutions is a leading Business Intelligence (BI) and data analytics company founded in 2015. We specialise in helping organisations transform raw data into actionable insights through advanced analytics platforms, custom dashboards, and AI-powered reporting tools. Our clients span finance, retail, healthcare, and logistics sectors across 30+ countries.
+
+Q: Where are your offices located?
+A: Our headquarters is in Tashkent, Uzbekistan, with regional offices in Dubai, Singapore, and Warsaw. We operate fully remote-capable teams and support clients globally through our cloud-based platform.
+
+Q: What industries do you serve?
+A: We serve clients in Banking & Finance, Retail & E-commerce, Healthcare & Pharmaceuticals, Logistics & Supply Chain, Telecommunications, and Government & Public Sector.
+
+Q: How many employees does TechCorp have?
+A: TechCorp currently employs over 450 professionals, including data engineers, BI developers, data scientists, UX designers, and client success managers.
+
+---
+
+SECTION 2: PRODUCTS & SERVICES
+---------------------------------
+
+Q: What is TechCorp BI Platform?
+A: The TechCorp BI Platform is our flagship self-service analytics solution. It provides real-time dashboards, drag-and-drop report builders, predictive analytics modules, and seamless integration with 200+ data sources including SQL databases, cloud data warehouses (Snowflake, BigQuery, Redshift), ERP systems (SAP, Oracle), and REST APIs.
+
+Q: What pricing plans are available?
+A: We offer three plans:
+- Starter: $99/month — up to 5 users, 10 GB data, basic dashboards
+- Professional: $399/month — up to 25 users, 100 GB data, advanced analytics, API access
+- Enterprise: Custom pricing — unlimited users, dedicated infrastructure, SLA guarantees, on-premise option
+All plans include a 14-day free trial with no credit card required.
+
+Q: Do you offer a free trial?
+A: Yes! Every plan includes a 14-day free trial with full access to all features in that tier. No credit card is required to start. You can upgrade, downgrade, or cancel at any time during or after the trial period.
+
+Q: What data connectors are supported?
+A: TechCorp supports 200+ native connectors, including: PostgreSQL, MySQL, Microsoft SQL Server, MongoDB, Google BigQuery, Snowflake, Amazon Redshift, Amazon S3, Google Sheets, Salesforce, HubSpot, SAP BW, Oracle EBS, Microsoft Dynamics 365, Shopify, Stripe, and REST/GraphQL APIs. Custom connectors can be built via our SDK.
+
+Q: Does the platform support real-time data?
+A: Yes. Our platform supports real-time streaming via Apache Kafka integration, WebSocket feeds, and sub-minute scheduled refresh rates on Professional and Enterprise plans. Starter plans support 15-minute minimum refresh intervals.
+
+Q: Can I embed dashboards into my own application?
+A: Yes. Our Embed SDK allows you to embed fully interactive dashboards, charts, and reports into any web application using iFrames or JavaScript SDK with row-level security applied per user. This feature is available on Professional and Enterprise plans.
+
+---
+
+SECTION 3: IMPLEMENTATION & ONBOARDING
+-----------------------------------------
+
+Q: How long does implementation take?
+A: For Starter and Professional plans, self-service onboarding typically takes 1–3 days. Our guided onboarding programme (included with Enterprise) involves a dedicated implementation engineer and typically completes in 2–6 weeks depending on data complexity, number of data sources, and custom requirements.
+
+Q: Do you provide training?
+A: Yes. We offer multiple training options:
+- Self-paced video courses on our Learning Portal (free for all customers)
+- Weekly live webinars (free, register at learn.techcorp.ai)
+- Private instructor-led training sessions (available as add-on)
+- Certification programme: TechCorp Certified BI Analyst (TCBA)
+
+Q: Is there a sandbox or demo environment?
+A: Yes. You can access a live demo environment at demo.techcorp.ai pre-loaded with sample retail and finance datasets. No sign-up required for read-only access; create a free account to save your own reports.
+
+---
+
+SECTION 4: SECURITY & COMPLIANCE
+-----------------------------------
+
+Q: How is our data secured?
+A: TechCorp uses AES-256 encryption at rest and TLS 1.3 in transit. Our infrastructure is hosted on AWS with SOC 2 Type II certification. We support SSO (SAML 2.0, OAuth 2.0, OpenID Connect), multi-factor authentication, IP whitelisting, and role-based access control (RBAC) with column/row-level security.
+
+Q: Is TechCorp GDPR compliant?
+A: Yes. TechCorp is fully GDPR compliant. We act as a data processor under GDPR and provide a Data Processing Agreement (DPA) to all Enterprise customers. We support data residency requirements in the EU (Frankfurt region) and can accommodate data deletion requests within 30 days.
+
+Q: Where is customer data stored?
+A: By default, data is stored in our US-East AWS region. Enterprise customers can select their preferred region: EU (Frankfurt), Asia-Pacific (Singapore), or US (Virginia/Oregon). On-premise deployment is also available.
+
+Q: Do you have penetration testing?
+A: Yes. We conduct annual third-party penetration tests and publish a summary report available to Enterprise customers under NDA. Our bug bounty programme is managed via HackerOne.
+
+---
+
+SECTION 5: BILLING & PAYMENTS
+--------------------------------
+
+Q: What payment methods do you accept?
+A: We accept all major credit/debit cards (Visa, Mastercard, Amex), PayPal, bank wire transfers, and invoicing (net-30 terms for Enterprise customers). Annual plans receive a 20% discount compared to monthly billing.
+
+Q: Can I change my plan at any time?
+A: Yes. You can upgrade instantly from the billing portal and the change takes effect immediately (prorated). Downgrades take effect at the start of the next billing cycle. You can cancel at any time; no cancellation fees apply.
+
+Q: What happens to my data if I cancel?
+A: After cancellation, your account enters a 30-day grace period during which you can export all data. After 30 days, data is permanently deleted from our servers. We recommend exporting before cancellation.
+
+Q: Do you offer refunds?
+A: We offer a 14-day money-back guarantee for first-time subscribers on Starter and Professional plans. Enterprise contracts are governed by individual agreement terms. Contact billing@techcorp.ai for refund requests.
+
+---
+
+SECTION 6: TECHNICAL SUPPORT
+-------------------------------
+
+Q: How do I contact support?
+A: Support channels by plan:
+- Starter: Email support (response within 24 hours), community forum
+- Professional: Email + live chat support (response within 4 hours, 9am–6pm UTC)
+- Enterprise: 24/7 phone, email, live chat, and dedicated Customer Success Manager
+
+Q: What is your uptime SLA?
+A: Our standard SLA guarantees 99.9% uptime (approximately 8.7 hours downtime/year). Enterprise SLAs can be customised up to 99.99%. Historical uptime is published at status.techcorp.ai.
+
+Q: Do you have an API?
+A: Yes. TechCorp offers a comprehensive REST API and GraphQL API for data ingestion, report generation, user management, and embedding. API documentation is available at docs.techcorp.ai. Rate limits: 1,000 req/min (Professional), unlimited (Enterprise).
+
+Q: How do I reset my password?
+A: Click "Forgot Password" on the login page and enter your registered email. You will receive a reset link within 2 minutes. If you don't receive it, check your spam folder or contact support@techcorp.ai.
+
+Q: Can I import my existing reports from another BI tool?
+A: We support migration from Tableau, Power BI, Looker, and Metabase. Our migration tool (available in the admin portal) can automatically convert workbooks and dashboards. Complex custom visualisations may require manual recreation. Our onboarding team assists Enterprise customers with migrations at no extra cost.
+
+---
+
+SECTION 7: INTEGRATIONS & PARTNERSHIPS
+-----------------------------------------
+
+Q: Does TechCorp integrate with Slack or Microsoft Teams?
+A: Yes. Our Alerting & Notifications module integrates with Slack, Microsoft Teams, and email to send automated report deliveries, threshold alerts, and anomaly notifications. Setup takes under 5 minutes from the Integrations panel.
+
+Q: Do you have a partner programme?
+A: Yes. The TechCorp Partner Programme includes Reseller, Technology, and Referral tiers. Partners receive revenue sharing (15–30%), co-marketing support, dedicated partner portal access, and priority support. Apply at partners.techcorp.ai.
+
+Q: Can TechCorp integrate with our existing data warehouse?
+A: Yes. TechCorp is warehouse-agnostic and connects natively to Snowflake, Google BigQuery, Amazon Redshift, Azure Synapse, Databricks, and Firebolt. We use push-down query optimisation to minimise data movement and reduce warehouse compute costs.
+
+---
+
+SECTION 8: BUSINESS INTELLIGENCE CONCEPTS
+--------------------------------------------
+
+Q: What is Business Intelligence (BI)?
+A: Business Intelligence (BI) is the set of technologies, processes, and practices that transform raw organisational data into meaningful information to support better business decision-making. BI encompasses data collection, data integration, data warehousing, reporting, dashboards, data visualisation, KPI monitoring, and predictive analytics.
+
+Q: What is the difference between BI and Data Analytics?
+A: BI focuses primarily on descriptive analytics — answering "what happened?" and "what is happening now?" using historical and current data. Data Analytics is a broader term that includes diagnostic analytics (why did it happen?), predictive analytics (what will happen?), and prescriptive analytics (what should we do?). Modern BI platforms like TechCorp increasingly incorporate all four types.
+
+Q: What is a KPI?
+A: A Key Performance Indicator (KPI) is a measurable value that demonstrates how effectively an organisation is achieving its key business objectives. Examples include Monthly Recurring Revenue (MRR), Customer Acquisition Cost (CAC), Net Promoter Score (NPS), Inventory Turnover Rate, and Employee Productivity Index. Good KPIs are SMART: Specific, Measurable, Achievable, Relevant, and Time-bound.
+
+Q: What is ETL?
+A: ETL stands for Extract, Transform, Load — the three-step process of pulling data from source systems, cleaning and transforming it into a consistent format, and loading it into a data warehouse or analytical database. Modern platforms often use ELT (Extract, Load, Transform), where transformation happens inside the data warehouse using its compute power.
+
+Q: What is a data warehouse?
+A: A data warehouse is a centralised repository designed for querying and analysis rather than transaction processing. It integrates data from multiple sources, applies a consistent schema, and is optimised for read-heavy analytical workloads. Common data warehouses include Amazon Redshift, Google BigQuery, Snowflake, and Azure Synapse Analytics.
