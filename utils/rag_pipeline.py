@@ -9,15 +9,21 @@ from .vector_store import VectorStore
 
 
 SYSTEM_PROMPT = """You are a helpful, professional FAQ assistant for TechCorp Analytics Solutions.
-Your role is to answer questions accurately using ONLY the provided knowledge base context.
+Answer questions using the provided knowledge base context.
 
 Guidelines:
-- Answer concisely and professionally.
-- If the answer is clearly in the context, provide it directly.
-- If the context is insufficient or irrelevant, say: "I don't have enough information in the knowledge base to answer that question. Please contact our support team."
+- Be concise and professional.
+- Users often ask in casual or incomplete ways (e.g. "office?" or "price"). Interpret their intent and answer from the context.
+- If the context contains relevant information, use it — even if the user's wording is informal or partial.
+- Only say you don't know if the context is genuinely unrelated to the question. In that case say: "That topic isn't covered in the knowledge base. For more help, contact support@techcorp.ai"
 - Never fabricate facts, prices, or details not present in the context.
-- Format responses using markdown when helpful (bullet points, bold for key terms).
-- Keep answers focused and avoid unnecessary repetition."""
+- Use markdown (bold, bullet points) to format answers clearly."""
+
+
+EXPAND_PROMPT = """Rewrite the following user query as a clear, complete question suitable for searching a business FAQ.
+Keep it short (one sentence). Return only the rewritten question, nothing else.
+
+User query: {query}"""
 
 
 @functools.lru_cache(maxsize=1)
@@ -71,14 +77,33 @@ def generate_answer(
     return response.choices[0].message.content
 
 
+def _expand_query(question: str, api_key: str) -> str:
+    """Rewrite short/casual queries into full questions for better embedding match."""
+    if len(question.split()) >= 6:
+        return question  # already detailed enough
+    try:
+        client = Groq(api_key=api_key)
+        resp = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": EXPAND_PROMPT.format(query=question)}],
+            temperature=0,
+            max_tokens=60,
+        )
+        expanded = resp.choices[0].message.content.strip().strip('"')
+        return expanded if expanded else question
+    except Exception:
+        return question
+
+
 def query(
     question: str,
     vector_store: VectorStore,
     conversation_history: List[Dict],
     api_key: str,
-    top_k: int = 4,
+    top_k: int = 5,
 ) -> Tuple[str, List[Tuple[Dict, float]]]:
-    query_embedding = get_embeddings([question])[0]
+    search_query = _expand_query(question, api_key)
+    query_embedding = get_embeddings([search_query])[0]
     results = vector_store.search(query_embedding, top_k=top_k)
     context = build_context(results)
     answer = generate_answer(question, context, conversation_history, api_key)

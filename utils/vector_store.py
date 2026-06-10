@@ -34,8 +34,8 @@ class VectorStore:
     def search(
         self,
         query_embedding: List[float],
-        top_k: int = 4,
-        score_threshold: float = 0.25,
+        top_k: int = 5,
+        score_threshold: float = 0.12,
     ) -> List[Tuple[Dict, float]]:
         if self._vectors is None or len(self._chunks) == 0:
             return []
